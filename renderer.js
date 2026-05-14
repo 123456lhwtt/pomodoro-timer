@@ -22,21 +22,34 @@ const sessionCount = document.getElementById('session-count');
 const sessionLabel = document.getElementById('session-label');
 const modeBtns = document.querySelectorAll('.mode-btn');
 
-// Audio context for beep
+// Audio context — created on first user interaction
 let audioCtx = null;
 
+function ensureAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
 function playBeep() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.type = 'sine';
-  osc.frequency.value = 880;
-  gain.gain.value = 0.3;
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-  osc.start(audioCtx.currentTime);
-  osc.stop(audioCtx.currentTime + 0.5);
+  ensureAudio();
+  const now = audioCtx.currentTime;
+  // Three quick beeps: 0.15s on, 0.1s off, repeat
+  [0, 0.25, 0.5].forEach((offset) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.3, now + offset);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.15);
+    osc.start(now + offset);
+    osc.stop(now + offset + 0.15);
+  });
 }
 
 function notify(title, body) {
@@ -159,6 +172,7 @@ btnStart.addEventListener('click', () => {
   if (timerInterval) {
     pauseTimer();
   } else {
+    ensureAudio(); // Activate audio on user gesture
     startTimer();
   }
 });
