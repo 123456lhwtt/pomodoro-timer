@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>番茄钟</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <div class="mode-tabs">
+      <button class="mode-btn active" data-mode="work">工作</button>
+      <button class="mode-btn" data-mode="shortBreak">短休息</button>
+      <button class="mode-btn" data-mode="longBreak">长休息</button>
+    </div>
+
+    <div class="timer-container">
+      <svg class="progress-ring" viewBox="0 0 200 200">
+        <circle class="ring-bg" cx="100" cy="100" r="90" />
+        <circle class="ring-fill" cx="100" cy="100" r="90" id="progress-ring" />
+      </svg>
+      <div class="timer-display" id="timer-display">25:00</div>
+    </div>
+
+    <div class="session-info">
+      <span id="session-label">阶段</span>
+      <span id="session-count">1 / 4</span>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" id="btn-start">开始</button>
+      <button class="btn btn-secondary" id="btn-reset">重置</button>
+    </div>
+
+    <div class="settings">
+      <div class="setting-item">
+        <label>工作</label>
+        <input type="number" id="set-work" value="25" min="1" max="120">
+        <span>分钟</span>
+      </div>
+      <div class="setting-item">
+        <label>短休息</label>
+        <input type="number" id="set-short" value="5" min="1" max="60">
+        <span>分钟</span>
+      </div>
+      <div class="setting-item">
+        <label>长休息</label>
+        <input type="number" id="set-long" value="15" min="1" max="60">
+        <span>分钟</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

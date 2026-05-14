@@ -1,0 +1,196 @@
+// Timer state
+const MODES = {
+  work: { label: '工作', minutes: 25 },
+  shortBreak: { label: '短休息', minutes: 5 },
+  longBreak: { label: '长休息', minutes: 15 },
+};
+
+const CIRCUMFERENCE = 2 * Math.PI * 90; // ~565.48
+
+let currentMode = 'work';
+let totalSeconds = MODES.work.minutes * 60;
+let remainingSeconds = totalSeconds;
+let timerInterval = null;
+let pomodoroCount = 1; // 1–4, resets to 1 after long break
+
+// DOM elements
+const timerDisplay = document.getElementById('timer-display');
+const progressRing = document.getElementById('progress-ring');
+const btnStart = document.getElementById('btn-start');
+const btnReset = document.getElementById('btn-reset');
+const sessionCount = document.getElementById('session-count');
+const sessionLabel = document.getElementById('session-label');
+const modeBtns = document.querySelectorAll('.mode-btn');
+
+// Audio context for beep
+let audioCtx = null;
+
+function playBeep() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.type = 'sine';
+  osc.frequency.value = 880;
+  gain.gain.value = 0.3;
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+  osc.start(audioCtx.currentTime);
+  osc.stop(audioCtx.currentTime + 0.5);
+}
+
+function notify(title, body) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, { body, silent: true });
+  }
+}
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function updateDisplay() {
+  timerDisplay.textContent = formatTime(remainingSeconds);
+  document.title = `${formatTime(remainingSeconds)} - ${MODES[currentMode].label}`;
+  const progress = (totalSeconds - remainingSeconds) / totalSeconds;
+  progressRing.style.strokeDashoffset = CIRCUMFERENCE * progress;
+}
+
+function switchMode(mode) {
+  currentMode = mode;
+  totalSeconds = MODES[mode].minutes * 60;
+  remainingSeconds = totalSeconds;
+
+  // Update body class for CSS color overrides
+  document.body.className = '';
+  if (mode === 'shortBreak') document.body.className = 'short-break';
+  if (mode === 'longBreak') document.body.className = 'long-break';
+
+  // Update mode buttons
+  modeBtns.forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
+
+  // Update progress ring
+  progressRing.style.strokeDashoffset = 0;
+
+  // Update session info
+  if (mode === 'work') {
+    sessionLabel.textContent = '阶段';
+    sessionCount.textContent = `${pomodoroCount} / 4`;
+  } else {
+    sessionLabel.textContent = '休息';
+    sessionCount.textContent = '';
+  }
+
+  updateDisplay();
+}
+
+function startTimer() {
+  if (timerInterval) return;
+  timerInterval = setInterval(() => {
+    remainingSeconds--;
+    updateDisplay();
+
+    if (remainingSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      playBeep();
+      notifySessionEnd();
+      advanceToNextMode();
+    }
+  }, 1000);
+
+  btnStart.textContent = '暂停';
+}
+
+function pauseTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  btnStart.textContent = '开始';
+}
+
+function resetTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  remainingSeconds = totalSeconds;
+  btnStart.textContent = '开始';
+  updateDisplay();
+}
+
+function notifySessionEnd() {
+  const title = currentMode === 'work' ? '工作完成！' : '休息结束！';
+  const body = currentMode === 'work' ? '该休息一下了。' : '开始专注吧！';
+  notify(title, body);
+}
+
+function advanceToNextMode() {
+  if (currentMode === 'work') {
+    if (pomodoroCount % 4 === 0) {
+      switchMode('longBreak');
+    } else {
+      switchMode('shortBreak');
+    }
+  } else {
+    if (currentMode === 'longBreak') {
+      pomodoroCount = 1;
+    } else {
+      pomodoroCount++;
+    }
+    switchMode('work');
+  }
+}
+
+// Request notification permission on first click
+document.addEventListener('click', () => {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}, { once: true });
+
+// Also request on start button
+btnStart.addEventListener('click', () => {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+
+  if (timerInterval) {
+    pauseTimer();
+  } else {
+    startTimer();
+  }
+});
+
+btnReset.addEventListener('click', resetTimer);
+
+modeBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    btnStart.textContent = '开始';
+    switchMode(btn.dataset.mode);
+  });
+});
+
+// Settings inputs
+const setWork = document.getElementById('set-work');
+const setShort = document.getElementById('set-short');
+const setLong = document.getElementById('set-long');
+
+function applySettings() {
+  MODES.work.minutes = parseInt(setWork.value) || 25;
+  MODES.shortBreak.minutes = parseInt(setShort.value) || 5;
+  MODES.longBreak.minutes = parseInt(setLong.value) || 15;
+  resetTimer();
+}
+
+[setWork, setShort, setLong].forEach((input) => {
+  input.addEventListener('change', applySettings);
+});
+
+// Init
+updateDisplay();
