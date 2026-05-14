@@ -6,75 +6,110 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #1a1a2e;
+  background: #0c0c1c;
+  background-image:
+    radial-gradient(ellipse at 50% 30%, rgba(233, 69, 96, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(78, 204, 163, 0.05) 0%, transparent 50%);
   color: #eee;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   user-select: none;
+  overflow: hidden;
+}
+
+/* Animated bg particles */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.15), transparent),
+    radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.1), transparent),
+    radial-gradient(1.5px 1.5px at 60% 20%, rgba(255,255,255,0.12), transparent),
+    radial-gradient(1px 1px at 80% 50%, rgba(255,255,255,0.08), transparent),
+    radial-gradient(1.5px 1.5px at 10% 80%, rgba(255,255,255,0.1), transparent),
+    radial-gradient(1px 1px at 70% 90%, rgba(255,255,255,0.06), transparent),
+    radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,0.1), transparent),
+    radial-gradient(1.5px 1.5px at 30% 50%, rgba(255,255,255,0.07), transparent);
+  pointer-events: none;
+  z-index: 0;
 }
 
 #app {
+  position: relative;
+  z-index: 1;
   text-align: center;
-  padding: 20px 30px;
+  padding: 30px 36px;
 }
 
-/* Mode Tabs */
+/* ── Mode Tabs ── */
 .mode-tabs {
   display: flex;
-  gap: 6px;
-  margin-bottom: 30px;
+  gap: 4px;
+  margin-bottom: 36px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 24px;
+  padding: 4px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.06);
 }
 
 .mode-btn {
-  background: #16213e;
-  color: #888;
+  background: transparent;
+  color: rgba(255,255,255,0.45);
   border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 9px 18px;
+  border-radius: 22px;
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .mode-btn:hover {
-  color: #ccc;
+  color: rgba(255,255,255,0.75);
 }
 
 .mode-btn.active {
   background: #e94560;
   color: #fff;
+  box-shadow: 0 4px 15px rgba(233, 69, 96, 0.35);
 }
 
-/* Timer */
+/* ── Timer Ring ── */
 .timer-container {
   position: relative;
-  width: 220px;
-  height: 220px;
-  margin: 0 auto 20px;
+  width: 260px;
+  height: 260px;
+  margin: 0 auto 24px;
 }
 
 .progress-ring {
   width: 100%;
   height: 100%;
   transform: rotate(-90deg);
+  filter: drop-shadow(0 0 12px rgba(233, 69, 96, 0.25));
+  transition: filter 0.3s;
 }
 
 .ring-bg {
   fill: none;
-  stroke: #16213e;
-  stroke-width: 6;
+  stroke: rgba(255,255,255,0.06);
+  stroke-width: 5;
 }
 
 .ring-fill {
   fill: none;
   stroke: #e94560;
-  stroke-width: 6;
+  stroke-width: 5;
   stroke-linecap: round;
   stroke-dasharray: 565.48;
   stroke-dashoffset: 0;
-  transition: stroke 0.3s;
+  transition: stroke 0.3s, stroke-dashoffset 0.3s linear;
 }
 
 .timer-display {
@@ -82,112 +117,178 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 48px;
-  font-weight: 300;
+  font-size: 58px;
+  font-weight: 200;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
+  color: #fff;
+  text-shadow: 0 0 30px rgba(255,255,255,0.15);
 }
 
-/* Session Info */
+/* Pulse when running */
+.timer-container.running .progress-ring {
+  animation: ring-glow 2s ease-in-out infinite;
+}
+
+@keyframes ring-glow {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(233, 69, 96, 0.25)); }
+  50% { filter: drop-shadow(0 0 24px rgba(233, 69, 96, 0.45)); }
+}
+
+/* ── Session Info ── */
 .session-info {
-  margin-bottom: 24px;
-  font-size: 14px;
-  color: #888;
+  margin-bottom: 28px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.5px;
 }
 
 .session-info span + span {
   margin-left: 8px;
 }
 
-/* Controls */
+/* ── Controls ── */
 .controls {
   display: flex;
   gap: 12px;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .btn {
   border: none;
-  padding: 12px 36px;
-  border-radius: 24px;
+  padding: 13px 42px;
+  border-radius: 26px;
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.5px;
 }
 
 .btn:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 .btn-primary {
   background: #e94560;
   color: #fff;
+  box-shadow: 0 4px 20px rgba(233, 69, 96, 0.3);
 }
 
 .btn-primary:hover {
-  background: #d63850;
+  background: #f04d68;
+  box-shadow: 0 6px 25px rgba(233, 69, 96, 0.4);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background: #16213e;
-  color: #888;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .btn-secondary:hover {
-  color: #ccc;
-  background: #1c2b4a;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  transform: translateY(-1px);
 }
 
-/* Settings */
+/* ── Settings ── */
 .settings {
   display: flex;
-  gap: 8px;
+  gap: 0;
   justify-content: center;
-  margin-top: 8px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 14px;
+  padding: 12px 4px;
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
 .setting-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   font-size: 12px;
-  color: #666;
+  padding: 0 14px;
+  border-right: 1px solid rgba(255,255,255,0.05);
+}
+
+.setting-item:last-child {
+  border-right: none;
 }
 
 .setting-item label {
+  color: rgba(255,255,255,0.3);
   white-space: nowrap;
 }
 
 .setting-item input {
-  width: 42px;
-  padding: 4px 6px;
-  border: 1px solid #2a2a4a;
-  border-radius: 6px;
-  background: #16213e;
-  color: #aaa;
-  font-size: 12px;
+  width: 40px;
+  padding: 5px 4px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  font-weight: 500;
   text-align: center;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .setting-item input:focus {
   border-color: #e94560;
+  background: rgba(233, 69, 96, 0.08);
 }
 
 .setting-item span {
-  color: #555;
+  color: rgba(255,255,255,0.2);
+  font-size: 11px;
 }
 
-/* Mode color overrides */
+/* ── Mode Color Overrides ── */
+body.short-break .mode-btn.active {
+  background: #4ecca3;
+  box-shadow: 0 4px 15px rgba(78, 204, 163, 0.35);
+}
 body.short-break .ring-fill { stroke: #4ecca3; }
-body.short-break .mode-btn.active { background: #4ecca3; }
-body.short-break .btn-primary { background: #4ecca3; }
-body.short-break .btn-primary:hover { background: #3db88f; }
+body.short-break .progress-ring { filter: drop-shadow(0 0 12px rgba(78, 204, 163, 0.25)); }
+body.short-break .btn-primary { background: #4ecca3; box-shadow: 0 4px 20px rgba(78, 204, 163, 0.3); }
+body.short-break .btn-primary:hover { background: #5adbb3; box-shadow: 0 6px 25px rgba(78, 204, 163, 0.4); }
+body.short-break .setting-item input:focus { border-color: #4ecca3; background: rgba(78, 204, 163, 0.08); }
+body.short-break .timer-container.running .progress-ring {
+  animation-name: ring-glow-green;
+}
+@keyframes ring-glow-green {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(78, 204, 163, 0.25)); }
+  50% { filter: drop-shadow(0 0 24px rgba(78, 204, 163, 0.45)); }
+}
 
-body.long-break .ring-fill { stroke: #0f3460; }
-body.long-break .mode-btn.active { background: #0f3460; }
-body.long-break .btn-primary { background: #0f3460; }
-body.long-break .btn-primary:hover { background: #1a4a7a; }
+body.long-break .mode-btn.active {
+  background: #5b8dee;
+  box-shadow: 0 4px 15px rgba(91, 141, 238, 0.35);
+}
+body.long-break .ring-fill { stroke: #5b8dee; }
+body.long-break .progress-ring { filter: drop-shadow(0 0 12px rgba(91, 141, 238, 0.25)); }
+body.long-break .btn-primary { background: #5b8dee; box-shadow: 0 4px 20px rgba(91, 141, 238, 0.3); }
+body.long-break .btn-primary:hover { background: #6e9cf2; box-shadow: 0 6px 25px rgba(91, 141, 238, 0.4); }
+body.long-break .setting-item input:focus { border-color: #5b8dee; background: rgba(91, 141, 238, 0.08); }
+body.long-break .timer-container.running .progress-ring {
+  animation-name: ring-glow-blue;
+}
+@keyframes ring-glow-blue {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(91, 141, 238, 0.25)); }
+  50% { filter: drop-shadow(0 0 24px rgba(91, 141, 238, 0.45)); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 400px) {
+  #app { padding: 20px; }
+  .timer-container { width: 220px; height: 220px; }
+  .timer-display { font-size: 48px; }
+  .btn { padding: 11px 32px; font-size: 14px; }
+  .mode-btn { padding: 7px 12px; font-size: 12px; }
+  .settings { flex-direction: column; gap: 8px; padding: 12px 16px; }
+  .setting-item { border-right: none; padding: 4px 0; justify-content: center; }
+}

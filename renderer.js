@@ -14,6 +14,7 @@ let timerInterval = null;
 let pomodoroCount = 1; // 1–4, resets to 1 after long break
 
 // DOM elements
+const timerContainer = document.querySelector('.timer-container');
 const timerDisplay = document.getElementById('timer-display');
 const progressRing = document.getElementById('progress-ring');
 const btnStart = document.getElementById('btn-start');
@@ -115,12 +116,14 @@ function startTimer() {
   }, 1000);
 
   btnStart.textContent = '暂停';
+  timerContainer.classList.add('running');
 }
 
 function pauseTimer() {
   clearInterval(timerInterval);
   timerInterval = null;
   btnStart.textContent = '开始';
+  timerContainer.classList.remove('running');
 }
 
 function resetTimer() {
@@ -130,6 +133,7 @@ function resetTimer() {
   }
   remainingSeconds = totalSeconds;
   btnStart.textContent = '开始';
+  timerContainer.classList.remove('running');
   updateDisplay();
 }
 
@@ -186,6 +190,7 @@ modeBtns.forEach((btn) => {
       timerInterval = null;
     }
     btnStart.textContent = '开始';
+    timerContainer.classList.remove('running');
     switchMode(btn.dataset.mode);
   });
 });
